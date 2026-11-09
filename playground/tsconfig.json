@@ -1,0 +1,38 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "vite/client"
+    ],
+    "paths": {
+      "nds": [
+        "../src/index.ts"
+      ],
+      "nds/agent": [
+        "../src/Agent.tsx"
+      ],
+      "nds/clones": [
+        "../src/Clones.tsx"
+      ],
+      "nds/fonts/CommitMono-VF.woff2": [
+        "../src/fonts/CommitMono-VF.woff2"
+      ],
+      "nds/highlight": [
+        "../src/Highlight.ts"
+      ],
+      "nds/site": [
+        "../src/Site.tsx"
+      ],
+      "nds/skin": [
+        "../src/Skin.ts"
+      ],
+      "nds/themes": [
+        "../src/Themes.ts"
+      ]
+    }
+  },
+  "include": [
+    "src",
+    "vite.config.ts"
+  ]
+}
