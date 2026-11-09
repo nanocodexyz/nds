@@ -147,7 +147,7 @@ export function Panel() {
 }
 ```
 
-A skin is plain data: a map from part names to props. An application replaces any part, or passes no skin and styles the `data-part` attributes with its own CSS.
+A skin is plain data: a map from part names to props. An application replaces any part, or passes no skin and styles the `data-nc` attributes with its own CSS.
 
 ```tsx
 import type { Skin } from 'nanocode-ts/react'
