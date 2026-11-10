@@ -7,6 +7,8 @@ export function Diagram(props: Diagram.Props) {
   const { svg } = props
   const dialog = useRef<HTMLDialogElement>(null)
   const [scale, setScale] = useState(1)
+  const box = svg.match(/viewBox="[\d.-]+ [\d.-]+ ([\d.]+) ([\d.]+)"/)
+  const ratio = box ? Number(box[1]) / Number(box[2]) : 1
 
   const zoom = (factor: number) => setScale((scale) => Math.min(6, Math.max(0.5, scale * factor)))
 
@@ -61,7 +63,7 @@ export function Diagram(props: Diagram.Props) {
           <div
             dangerouslySetInnerHTML={{ __html: svg }}
             data-ondine=""
-            style={{ width: `${scale * 100}%` }}
+            style={{ width: `calc(min(100cqw, ${ratio} * 100cqh) * ${scale})` }}
             {...styles.zoomed()}
           />
         </div>
@@ -130,13 +132,21 @@ namespace styles {
 
   export const close = style({ marginLeft: 'auto !custom' })
 
-  export const canvas = style({ flex: '1 !custom', overflow: 'auto', padding: 'md' })
+  export const canvas = style({
+    containerType: 'size',
+    display: 'flex',
+    flex: '1 !custom',
+    minHeight: '0',
+    overflow: 'auto',
+    padding: 'md',
+  })
 
   export const zoomed = style({
     '--ondine-bg': 'transparent',
     '--ondine-fg': 'currentColor !custom',
     '--ondine-line': `${vars.color.middle} !custom`,
     '& svg': { display: 'block', height: 'auto !custom', width: '100% !custom' },
-    marginInline: 'auto !custom',
+    flexShrink: 0,
+    margin: 'auto !custom',
   })
 }
