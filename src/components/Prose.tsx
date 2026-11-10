@@ -41,6 +41,7 @@ namespace styles {
       border: '1px solid',
       borderColor: 'rule',
       paddingInline: 'cell',
+      overflowWrap: 'normal',
       textAlign: 'left',
       verticalAlign: 'top',
     },
