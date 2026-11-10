@@ -38,7 +38,6 @@ export function Header(props: Header.Props) {
     <header {...styles.header()}>
       <nav aria-label="Site" {...styles.navigation()}>
         {sections.map((section, index) => {
-          const label = `${String(index + 1).padStart(2, '0')} ${section.label}`
           const current =
             (props.current ?? (props.experiment ? 'Experiments' : undefined)) === section.label
           return (
@@ -48,7 +47,8 @@ export function Header(props: Header.Props) {
               key={section.href}
               {...styles.link({ current })}
             >
-              {label}
+              <span {...styles.ordinal()}>{String(index + 1).padStart(2, '0')} </span>
+              {section.label}
             </a>
           )
         })}
@@ -141,6 +141,16 @@ export function Lead(props: Lead.Props) {
 }
 
 export declare namespace Lead {
+  type Props = {
+    children: ReactNode
+  }
+}
+
+export function Terminal(props: Terminal.Props) {
+  return <div {...styles.terminal()}>{props.children}</div>
+}
+
+export declare namespace Terminal {
   type Props = {
     children: ReactNode
   }

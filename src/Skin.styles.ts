@@ -370,6 +370,7 @@ export const choice = style({
   textAlign: 'left',
   textDecoration: 'none',
   whiteSpace: 'nowrap',
+  '@media (max-width: 600px)': { whiteSpace: 'normal' },
 })
 
 export const choiceLabel = style({
@@ -383,6 +384,7 @@ export const choiceDetail = style({
   overflow: 'hidden',
   paddingLeft: 'cell',
   textOverflow: 'ellipsis',
+  '@media (max-width: 600px)': { gridColumn: '2 / -1 !custom', paddingLeft: '0' },
 })
 
 export const typing = variants({
@@ -544,6 +546,11 @@ export const suggestions = style({
   paddingBlock: 'xs',
   paddingInline: 'md',
   whiteSpace: 'nowrap',
+  '@media (max-width: 600px)': {
+    overflowX: 'auto',
+    scrollbarWidth: 'none',
+    selectors: { '& > button': { flexShrink: 0 } },
+  },
 })
 
 export const suggestion = variants({

@@ -75,7 +75,7 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
-    "nanocode-ts": "https://github.com/nanocodexyz/nanocode-ts/releases/download/build-2539c55/nanocode-ts-2539c55.tgz",
+    "nanocode-ts": "https://github.com/nanocodexyz/nanocode-ts/releases/download/build-cd68d9e/nanocode-ts-cd68d9e.tgz",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "typescript": "6.0.2",

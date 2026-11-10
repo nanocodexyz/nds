@@ -73,7 +73,22 @@ export const header = style({
   '@media (max-width: 1000px)': { paddingInline: 'indent' },
 })
 
-export const navigation = style({ display: 'flex', gap: 'gutter', width: 'max-content !custom' })
+export const navigation = style({
+  display: 'flex',
+  gap: 'gutter',
+  width: 'max-content !custom',
+  '@media (max-width: 600px)': { gap: 'indent' },
+})
+
+export const ordinal = style({ '@media (max-width: 600px)': { display: 'none' } })
+
+export const terminal = style({
+  marginInline: `calc((${vars.spacing.md} + 1px) * -1) !custom`,
+  '@media (max-width: 1000px)': {
+    marginInline: `calc(${vars.spacing.indent} * -1) !custom`,
+    selectors: { '& > section': { borderInline: 'none' } },
+  },
+})
 
 export const link = variants({
   base: {
