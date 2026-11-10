@@ -147,7 +147,7 @@ function create(props: Agent.Props) {
   }
 
   let listing: Listing = { state: 'listing' }
-  const listed = Tempo.list(catalog).then(
+  const listed = Tempo.list(catalog, { harness: props.theme === 'claude' ? 'claude' : 'codex' }).then(
     (harnesses) => {
       listing = { harnesses, state: 'listed' }
     },
