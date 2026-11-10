@@ -16,10 +16,16 @@ nds is the nanocode design system: the tokens, page chrome, document components 
 
 The same headless chat under three of the seven themes: nanocode, ChatGPT and Claude.
 
-<p>
-  <img alt="The chat under the nanocode theme" src="assets/chat-nanocode.png" width="32%" />
-  <img alt="The chat under the ChatGPT theme" src="assets/chat-chatgpt.png" width="32%" />
-  <img alt="The chat under the Claude theme" src="assets/chat-claude.png" width="32%" />
+<p align="center">
+  <img alt="The chat under the nanocode theme" src="assets/chat-nanocode.png" width="640" />
+</p>
+
+<p align="center">
+  <img alt="The chat under the ChatGPT theme" src="assets/chat-chatgpt.png" width="640" />
+</p>
+
+<p align="center">
+  <img alt="The chat under the Claude theme" src="assets/chat-claude.png" width="640" />
 </p>
 
 ```tsx
