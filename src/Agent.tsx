@@ -10,8 +10,9 @@ import {
   type Relay,
   type Transport as ClientTransport,
 } from 'nanocode-ts/client'
-import { Keyring, Wallet } from 'nanocode-ts/machines'
+import { Keyring, Tempo, Wallet } from 'nanocode-ts/machines'
 import { Prompts, useUnlock, walletCards, walletConnection } from 'nanocode-ts/machines/react'
+import { models as catalog } from 'nanocode-ts/models'
 import {
   Chat,
   HandConnect,
@@ -56,6 +57,11 @@ export type Host = {
   transport: ClientTransport.Transport &
     Relay.Source & { crash?(): Promise<Response>; session(): { id?: string }; warm(): void }
 }
+
+type Listing =
+  | { error: string; state: 'failed' }
+  | { harnesses: Harness[]; state: 'listed' }
+  | { state: 'listing' }
 
 type Saved = {
   bound: Record<string, string>
@@ -106,7 +112,6 @@ export declare namespace Agent {
     title?: string
     token?: boolean | (() => Promise<boolean>)
     wallet: Wallet.Options
-    walletHarnesses?: Harness[]
   }
 }
 
@@ -141,20 +146,31 @@ function create(props: Agent.Props) {
     changed()
   }
 
+  let listing: Listing = { state: 'listing' }
+  const listed = Tempo.list(catalog).then(
+    (harnesses) => {
+      listing = { harnesses, state: 'listed' }
+    },
+    (error: unknown) => {
+      listing = { error: error instanceof Error ? error.message : String(error), state: 'failed' }
+    },
+  )
+  void listed.then(changed)
+
   const signed = (provider: Plans.Provider) => status?.[provider].state === 'authenticated'
 
-  const harnessesOf = (payer: Contracts.Payer) =>
-    payer === 'wallet'
-      ? shown(props.walletHarnesses)
-      : payer === 'plan'
-        ? shown(props.planHarnesses).filter((harness) => signed(harness.id))
-        : shown(props.harnesses)
+  const harnessesOf = (payer: Contracts.Payer) => {
+    if (payer === 'wallet') return listing.state === 'listed' ? shown(listing.harnesses) : []
+    if (payer === 'plan') return shown(props.planHarnesses).filter((harness) => signed(harness.id))
+    return shown(props.harnesses)
+  }
 
   const payer = (): Contracts.Payer => {
     const conversation = config.getState().conversation
     const bound = conversation ? saved.paid?.[conversation] : undefined
     if (bound) return bound
     const chosen = saved.payer ?? 'deployment'
+    if (chosen === 'wallet' && listing.state === 'listing') return chosen
     return harnessesOf(chosen).length ? chosen : 'deployment'
   }
 
@@ -168,7 +184,12 @@ function create(props: Agent.Props) {
   const current = (): Model => {
     const conversation = config.getState().conversation
     const id = (conversation && saved.bound[conversation]) || saved.picked || props.model
-    return models().find((model) => model.id === id) ?? models()[0]!
+    const fallback = shown(props.harnesses)[0]?.models[0]?.id
+    return (
+      models().find((model) => model.id === id) ??
+      models().find((model) => model.id === fallback) ??
+      models()[0]!
+    )
   }
 
   const harnessOf = (model: Model) => offered().find((harness) => harness.models.includes(model))!
@@ -239,6 +260,8 @@ function create(props: Agent.Props) {
     current,
     harnessOf,
     host,
+    listed,
+    listing: () => listing,
     models,
     offer: (next: Plans.Status | undefined) => {
       status = next
@@ -260,7 +283,6 @@ function create(props: Agent.Props) {
     planned: (provider: Plans.Provider) =>
       shown(props.planHarnesses).find((harness) => harness.id === provider),
     signed,
-    walletHarnesses: () => shown(props.walletHarnesses),
     think: (id: string, level: string) => {
       saved.picked = id
       saved.thinking = { ...saved.thinking, [id]: level }
@@ -352,6 +374,13 @@ function View(props: Agent.Props & { agent: Instance }) {
 
   const ready = async () => {
     if (agent.payer() !== 'wallet') return
+    await agent.listed
+    const listing = agent.listing()
+    if (listing.state === 'failed')
+      return config.note(
+        'error',
+        `The Tempo gateway's models did not load (${listing.error}), so Tempo Wallet pays for no model: type /pay to choose another payer.`,
+      )
     const key = unlock.connected ?? Wallet.restore()
     if (!key)
       return config.note(
@@ -375,19 +404,20 @@ function View(props: Agent.Props & { agent: Instance }) {
       detail: `the free models on the key of ${props.wallet.name}`,
       current: payer === 'deployment',
     },
-    ...(agent.walletHarnesses().length
-      ? [
-          {
-            kind: 'choice' as const,
-            label: 'Tempo Wallet',
-            value: 'wallet',
-            detail: unlock.connected
-              ? `MACH per token from ${Wallet.short(unlock.connected.address)}`
-              : 'MACH per token from your wallet, after you connect it',
-            current: payer === 'wallet',
-          },
-        ]
-      : []),
+    {
+      kind: 'choice',
+      label: 'Tempo Wallet',
+      value: 'wallet',
+      detail: (() => {
+        const listing = agent.listing()
+        if (listing.state === 'failed')
+          return `the Tempo gateway's models did not load: ${listing.error}`
+        if (unlock.connected)
+          return `every Tempo gateway model, MACH per token from ${Wallet.short(unlock.connected.address)}`
+        return 'every Tempo gateway model, MACH per token from your wallet, after you connect it'
+      })(),
+      current: payer === 'wallet',
+    },
     ...(agent.host.plans
       ? (['claude', 'codex'] as const)
           .filter((provider) => agent.planned(provider))
@@ -405,6 +435,9 @@ function View(props: Agent.Props & { agent: Instance }) {
     setPicker(null)
     const [next, provider] = value.split(':') as [Contracts.Payer, Plans.Provider | undefined]
     if (next === 'plan' && provider && !signed(provider)) return plans.signIn(provider)
+    const listing = agent.listing()
+    if (next === 'wallet' && listing.state === 'failed')
+      return config.note('error', `The Tempo gateway's models did not load: ${listing.error}`)
     if (next === 'wallet' && !unlock.connected) {
       await unlock.command('/login', false)
       if (!Wallet.restore()) return
@@ -507,7 +540,12 @@ function View(props: Agent.Props & { agent: Instance }) {
       if (!argument) {
         setPicker({
           filter: true,
-          items: (query) => Pickers.models(agent.offered(), { model: model.id, query }),
+          items: (query) => [
+            ...(agent.payer() === 'wallet' && agent.listing().state === 'listing'
+              ? [{ kind: 'header' as const, label: 'Tempo: listing models…' }]
+              : []),
+            ...Pickers.models(agent.offered(), { model: model.id, query }),
+          ],
           onChoose: (item) => pick(item.label),
           title: 'Model',
         })
@@ -702,11 +740,7 @@ function View(props: Agent.Props & { agent: Instance }) {
       current: model.id,
       models: agent.models().map((entry) => ({
         detail:
-          payer === 'plan'
-            ? `${entry.name} · your ${plan} plan`
-            : payer === 'wallet'
-              ? `${entry.name} · Tempo Wallet`
-              : (entry.detail ?? entry.name),
+          payer === 'plan' ? `${entry.name} · your ${plan} plan` : (entry.detail ?? entry.name),
         id: entry.id,
         label: entry.label,
       })),
