@@ -4,11 +4,23 @@
   <a href="#overview">Overview</a> · <a href="#getting-started">Getting Started</a> · <a href="#entrypoints">Entrypoints</a> · <a href="#development">Development</a> · <a href="#license">License</a>
 </p>
 
+<p align="center">
+  <img alt="The nds playground: the page chrome, the tokens and the document components" src="assets/page.png" width="720" />
+</p>
+
 ## Overview
 
 nds is the nanocode design system: the tokens, page chrome, document components and chat skins of [nanocode.xyz](https://nanocode.xyz) and its demos, styled with [Zyzz](https://zyzz.style).
 
 [nanocode-ts](https://github.com/nanocodexyz/nanocode-ts) ships the chat as headless React components that render unstyled HTML. nds dresses them. An application takes the behavior from `nanocode-ts/react` and the look from `nds`, or from its own skin.
+
+The same headless chat under three of the seven themes: nanocode, ChatGPT and Claude.
+
+<p>
+  <img alt="The chat under the nanocode theme" src="assets/chat-nanocode.png" width="32%" />
+  <img alt="The chat under the ChatGPT theme" src="assets/chat-chatgpt.png" width="32%" />
+  <img alt="The chat under the Claude theme" src="assets/chat-claude.png" width="32%" />
+</p>
 
 ```tsx
 import { Config } from 'nanocode-ts/client'
@@ -162,7 +174,7 @@ const custom: Skin = { ...skin, parts: { ...skin.parts, tool: () => ({ className
 | Import | Holds |
 | --- | --- |
 | `nds` | `tokens`, `style`, `variants`, `vars`, the keyframes, and `Callout`, `Card`, `Cards`, `CodeBlock`, `Diagram`, `Kbd`, `Prose`, `Tab`, `Tabs` |
-| `nds/site` | `Header`, `Main`, `Page`, `Title`, `Lead`, `Demos`, and `styles.body` |
+| `nds/site` | `Header`, `Main`, `Page`, `Title`, `Lead`, `Points`, `Links`, `Demos`, and `styles.body` |
 | `nds/skin` | `skin`, the nanocode look of the headless chat, and its `styles` |
 | `nds/themes` | `themes`: nanocode, ChatGPT, Claude, Gemini, Paper, Phosphor and Headless, with `themeStyle` |
 | `nds/clones` | `ChatGpt` and `Claude`, whole applications in those styles |

@@ -145,3 +145,23 @@ export declare namespace Lead {
     children: ReactNode
   }
 }
+
+export function Links(props: Links.Props) {
+  return <p {...styles.links()}>{props.children}</p>
+}
+
+export declare namespace Links {
+  type Props = {
+    children: ReactNode
+  }
+}
+
+export function Points(props: Points.Props) {
+  return <ul {...styles.points()}>{props.children}</ul>
+}
+
+export declare namespace Points {
+  type Props = {
+    children: ReactNode
+  }
+}

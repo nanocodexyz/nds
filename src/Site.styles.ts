@@ -1,4 +1,4 @@
-import { flicker, style, variants } from './zyzz.config.ts'
+import { flicker, style, variants, vars } from './zyzz.config.ts'
 
 export const body = style({
   backgroundColor: 'bg',
@@ -164,3 +164,23 @@ export const logo = style({
 })
 
 export const lead = style({ maxWidth: 'prose' })
+
+export const points = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 'xs',
+  listStyle: 'none',
+  maxWidth: 'column',
+  selectors: {
+    '& > li': { marginLeft: 'indent' },
+    '& > li::before': {
+      color: 'accent',
+      content: '"• "',
+      marginLeft: `calc(${vars.spacing.indent} * -1) !custom`,
+      position: 'absolute',
+    },
+    '& strong': { fontVariationSettings: '"wght" 700', fontWeight: 'normal' },
+  },
+})
+
+export const links = style({ columnGap: 'gutter', display: 'flex', flexWrap: 'wrap', rowGap: 'xs' })

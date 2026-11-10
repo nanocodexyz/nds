@@ -11,7 +11,7 @@ import {
   type Transport as ClientTransport,
 } from 'nanocode-ts/client'
 import { Keyring, Wallet } from 'nanocode-ts/machines'
-import { Prompts, Unlock, useUnlock, walletCards } from 'nanocode-ts/machines/react'
+import { Prompts, useUnlock, walletCards } from 'nanocode-ts/machines/react'
 import {
   Chat,
   HandConnect,
@@ -73,6 +73,7 @@ const commands = [
     label: '/pay',
   },
   { detail: 'start a new session', label: '/new' },
+  { detail: 'connect Tempo Wallet, your ChatGPT or Claude plan, or your machine', label: '/connect' },
   { detail: "run this session's code on your machine", label: '/hand' },
 ]
 
@@ -292,6 +293,7 @@ function View(props: Agent.Props & { agent: Instance }) {
   const session = transport.session().id
   const opened = useRef(session)
   const joined = useRef(plans.status)
+  const asked = useRef(false)
 
   useEffect(() => {
     if (typeof props.token === 'function') void props.token().then(setAsks)
@@ -335,6 +337,11 @@ function View(props: Agent.Props & { agent: Instance }) {
       `Your ${Plans.name(provider)} plan pays for the model in new sessions; type /pay to choose another payer.`,
     )
   }, [plans.status])
+
+  useEffect(() => {
+    if (props.theme === 'nanocode' && asked.current && plans.error && !plans.pending)
+      config.note('error', plans.error)
+  }, [plans.error])
 
   const model = agent.current()
   const harness = agent.harnessOf(model)
@@ -426,6 +433,56 @@ function View(props: Agent.Props & { agent: Instance }) {
       title: 'Who pays for the model',
     })
 
+  const connectItems = (): Pickers.Item[] => [
+    {
+      kind: 'choice',
+      label: 'Tempo Wallet',
+      value: 'wallet',
+      detail: unlock.connected
+        ? `connected as ${Wallet.short(unlock.connected.address)} · log out`
+        : 'pay for tools and services per request',
+      current: Boolean(unlock.connected),
+    },
+    ...(agent.host.plans
+      ? (['codex', 'claude'] as const).map((provider) => ({
+          kind: 'choice' as const,
+          label: `${Plans.name(provider)} plan`,
+          value: `plan:${provider}`,
+          detail: signed(provider)
+            ? 'connected · sign out'
+            : (plans.error ?? 'run the model on your subscription'),
+          current: signed(provider),
+        }))
+      : []),
+    {
+      kind: 'choice',
+      label: 'Your machine',
+      value: 'hand',
+      detail: hand.hands.length
+        ? `${hand.where} · show the command`
+        : "run the agent's code with your files and shell",
+      current: hand.hands.length > 0,
+    },
+  ]
+
+  const connect = (value: string) => {
+    setPicker(null)
+    if (value === 'hand') return hand.show()
+    if (value === 'wallet')
+      return void unlock.command(unlock.connected ? '/logout' : '/login', false)
+    const provider = value.slice('plan:'.length) as Plans.Provider
+    asked.current = true
+    if (signed(provider)) plans.signOut(provider)
+    else plans.signIn(provider)
+  }
+
+  const openConnect = () =>
+    setPicker({
+      items: connectItems,
+      onChoose: (item) => connect(item.value ?? item.label),
+      title: 'Connect',
+    })
+
   const think = (id: string, chosen: string) => {
     if (session && props.effortCommand) {
       if (chosen !== level) void send(`/effort ${chosen}`)
@@ -475,6 +532,10 @@ function View(props: Agent.Props & { agent: Instance }) {
     }
     if (name === '/hand') {
       hand.show()
+      return true
+    }
+    if (name === '/connect') {
+      openConnect()
       return true
     }
     if (name === '/pay') {
@@ -551,6 +612,9 @@ function View(props: Agent.Props & { agent: Instance }) {
       <Chat
         actions={
           <>
+            <button onClick={openConnect} type="button" {...styles.suggestion({ quiet: true })}>
+              Connect
+            </button>
             <button
               disabled={busy}
               onClick={openPayers}
@@ -571,12 +635,11 @@ function View(props: Agent.Props & { agent: Instance }) {
         }
         after={walletCards(unlock)}
         commands={[...commands, ...unlock.commands]}
-        empty="Ask a question to start a turn, or type /model to choose a model."
+        empty="Ask anything. Type / for commands, such as /model and /connect."
         extras={
           <>
-            {agent.host.plans && <PlanConnect plans={plans} />}
-            <HandConnect hand={hand} />
-            <Unlock machine={unlock} />
+            {plans.pending && <PlanConnect plans={plans} providers={[plans.pending.provider]} />}
+            {(hand.open || hand.error) && <HandConnect hand={hand} />}
             <Prompts machine={unlock} />
             {asks && (
               <label {...styles.row()}>
