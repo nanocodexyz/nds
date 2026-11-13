@@ -78,7 +78,7 @@ export declare namespace Diagram {
 
 namespace styles {
   export const diagram = style({
-    '--ondine-bg': 'transparent',
+    '--ondine-bg': `${vars.color.surface} !custom`,
     '--ondine-fg': 'currentColor !custom',
     '--ondine-line': `${vars.color.middle} !custom`,
     '& svg': { display: 'block', height: 'auto !custom', maxWidth: '100% !custom' },
@@ -142,7 +142,7 @@ namespace styles {
   })
 
   export const zoomed = style({
-    '--ondine-bg': 'transparent',
+    '--ondine-bg': `${vars.color.surface} !custom`,
     '--ondine-fg': 'currentColor !custom',
     '--ondine-line': `${vars.color.middle} !custom`,
     '& svg': { display: 'block', height: 'auto !custom', width: '100% !custom' },
