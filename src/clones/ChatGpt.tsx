@@ -4,6 +4,7 @@ import type { Config, Transcript } from 'nanocode-ts/client'
 import {
   AttachmentList,
   type Highlighter,
+  Image,
   Markdown,
   NanocodeProvider,
   type Skin,
@@ -144,6 +145,9 @@ function Tools(props: Tools.Props) {
   const running = props.block.cells.some((cell) => cell.status === 'running')
   const shown = open ?? running
   const count = props.block.cells.length
+  const images = props.block.cells.flatMap((cell) =>
+    (cell.images ?? []).map((src, index) => ({ alt: cell.name + ' image ' + (index + 1), src })),
+  )
   const code = props.block.cells.every((cell) => cell.name === 'code' || cell.tool === 'exec')
   const label = running
     ? code
@@ -173,12 +177,20 @@ function Tools(props: Tools.Props) {
         </span>
         <Chevron />
       </button>
-      {shown && (
+      {shown ? (
         <div className="gpt-tools-body">
           {props.block.cells.map((cell) => (
             <ToolCell cell={cell} key={cell.call_id} live={props.block.live} />
           ))}
         </div>
+      ) : (
+        images.length > 0 && (
+          <div className="gpt-tools-images">
+            {images.map((image, index) => (
+              <Image alt={image.alt} key={index} src={image.src} />
+            ))}
+          </div>
+        )
       )}
     </div>
   )
