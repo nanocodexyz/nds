@@ -109,6 +109,7 @@ export declare namespace Agent {
     scripts?: boolean
     storage: string
     theme: Theme
+    thinking?: Model['effort']
     title?: string
     token?: boolean | (() => Promise<boolean>)
     wallet: Wallet.Options
@@ -194,8 +195,10 @@ function create(props: Agent.Props) {
 
   const harnessOf = (model: Model) => offered().find((harness) => harness.models.includes(model))!
 
+  const preferred = props.thinking ?? 'low'
+
   const thinking = (model: Model) =>
-    saved.thinking?.[model.id] ?? (model.efforts.includes('low') ? 'low' : model.effort)
+    saved.thinking?.[model.id] ?? (model.efforts.includes(preferred) ? preferred : model.effort)
 
   const headers = (): Record<string, string> => {
     const secret = localStorage.getItem(token)
