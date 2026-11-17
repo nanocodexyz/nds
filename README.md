@@ -133,7 +133,7 @@ export function Agent() {
 }
 ```
 
-`nds/agent` is a whole demo chat in one component. A page passes its transport and gets the model picker, the wallet, plans, hands and the three looks.
+`nds/agent` is a whole demo chat in one component. A page passes its transport and gets the model picker, Tempo ID sign-in, plans, hands and the three looks.
 
 ```tsx
 import { Agent } from 'nds/agent'
