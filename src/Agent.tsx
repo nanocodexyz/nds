@@ -77,7 +77,7 @@ const commands = [
   { detail: 'choose harness, model and thinking for a new session', label: '/model' },
   { detail: 'choose the thinking of the next turns', label: '/effort' },
   {
-    detail: 'choose who pays for the model: this deployment, Tempo Wallet or your plan',
+    detail: 'choose who pays for the model: this deployment, Tempo ID or your plan',
     label: '/pay',
   },
   { detail: 'start a new session', label: '/new' },
@@ -370,7 +370,7 @@ function View(props: Agent.Props & { agent: Instance }) {
   const signed = (provider: Plans.Provider) => plans.status?.[provider].state === 'authenticated'
   const paidBy = (entry: Contracts.Payer, provider: Plans.Provider = harness.id) =>
     entry === 'wallet'
-      ? 'Tempo Wallet'
+      ? 'Tempo ID'
       : entry === 'plan'
         ? `${Plans.name(provider)} plan`
         : 'this deployment'
@@ -382,13 +382,13 @@ function View(props: Agent.Props & { agent: Instance }) {
     if (listing.state === 'failed')
       return config.note(
         'error',
-        `The Tempo gateway's models did not load (${listing.error}), so Tempo Wallet pays for no model: type /pay to choose another payer.`,
+        `The Tempo gateway's models did not load (${listing.error}), so Tempo ID pays for no model: type /pay to choose another payer.`,
       )
     const key = unlock.connected ?? Wallet.restore()
     if (!key)
       return config.note(
         'error',
-        'Tempo Wallet pays for this session: connect it with /login, or type /new and /pay to choose another payer.',
+        'Tempo ID pays for this session: sign in with /login, or type /new and /pay to choose another payer.',
       )
     await agent.host.keyring
       .register(key)
@@ -409,7 +409,7 @@ function View(props: Agent.Props & { agent: Instance }) {
     },
     {
       kind: 'choice',
-      label: 'Tempo Wallet',
+      label: 'Tempo ID',
       value: 'wallet',
       detail: (() => {
         const listing = agent.listing()
@@ -417,7 +417,7 @@ function View(props: Agent.Props & { agent: Instance }) {
           return `the Tempo gateway's models did not load: ${listing.error}`
         if (unlock.connected)
           return `every Tempo gateway model, MACH per token from ${Wallet.short(unlock.connected.address)}`
-        return 'every Tempo gateway model, MACH per token from your wallet, after you connect it'
+        return 'every Tempo gateway model, MACH per token from your Tempo ID, after you sign in'
       })(),
       current: payer === 'wallet',
     },
@@ -692,7 +692,7 @@ function View(props: Agent.Props & { agent: Instance }) {
         : item.value === 'deployment'
           ? "Pay with this deployment's key"
           : item.value === 'wallet'
-            ? 'Pay with Tempo Wallet'
+            ? 'Pay with Tempo ID'
             : `Pay with your ${item.label}`,
       onClick: () => void choosePayer(item.value ?? item.label),
     })),
@@ -728,7 +728,7 @@ function View(props: Agent.Props & { agent: Instance }) {
             ? Wallet.short(unlock.connected.address)
             : unlock.working
               ? 'Connecting…'
-              : 'Connect Tempo Wallet'}
+              : 'Sign in with Tempo ID'}
         </button>
       </span>
     ),
