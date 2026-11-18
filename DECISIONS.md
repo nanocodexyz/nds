@@ -28,6 +28,6 @@
 
 ## 2026-11-18: Install the Prebuilt SDK
 
-The development dependency pins nanocode-ts build-6d58e23 instead of a Git checkout. Its release includes JavaScript, declarations, and WebAssembly, so dependency installation does not compile the SDK.
+The development dependency pins nanocode-ts build-41b0f57 instead of a Git checkout. Its release includes JavaScript, declarations, and WebAssembly, so dependency installation does not compile the SDK.
 
 - 2026-11-18: Pin the immutable SDK `build-41b0f57` tarball and its resolver-generated integrity. Its agent/Python source epoch is `08a2d14ddcfedcd9fb0b08fffd200584cb09154e`; the independent shell pin is unchanged. Build and check the host before promoting or deploying this candidate.
